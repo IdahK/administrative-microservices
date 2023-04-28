@@ -1,0 +1,26 @@
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone:  http://${eureka.instance.hostname}:${server.port}/eureka/
+management:
+  endpoints:
+    web:
+     exposure:
+        include:  info, health
+app:
+  name: Main Discovery Service
+spring:
+  application:
+    name: discovery-service
+  cloud:
+    config:
+      enabled: false
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
