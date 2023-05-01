@@ -1,5 +1,84 @@
-#spring:
-#  cloud:
-#    gateway:
-#      routes:
-#      - id:
+spring:
+  application:
+    name: GATEWAY-SERVICE
+  main:
+    allow-bean-definition-overriding: true
+    web-application-type: reactive
+  cloud:
+    circuitbreaker:
+      resilience4j:
+        enabled: true
+    gateway:
+      enabled: true
+      routes:
+        - id: swagger-v2
+          uri:  http://localhost:${server.port}
+          predicates:
+            - Path=/v2/api-docs/**
+          filters:
+            - RewritePath=/v2/api-docs/(?<path>.*), /$\{path}/v2/api-docs
+        - id: swagger
+          predicates:
+            - Path=/v3/api-docs/**
+          filters:
+            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v2/api-docs
+          uri: http://localhost:${server.port}
+        - id: EMPLOYEE-SERVICE
+          uri: lb://EMPLOYEE-SERVICE
+          predicates:
+            - Path=/employee-service/**
+          filters:
+            - StripPrefix=1
+
+      discovery:
+        locator:
+          lower-case-service-id: true
+          enabled: true
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 3
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+server:
+  port: 8082
+  connection-timeout: 60000
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include:  ["health", "info", "metrics", "prometheus", "bindings", "beans", "env", "loggers", "streamsbindings", "mappings", "gateway"]
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    gateway:
+      enabled: true
+app:
+  name: Gateway Service
+springdoc:
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+  api-docs:
+    path: /openapi/v3/api-docs
+  paths-to-match: /**
+logging:
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n'
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+
+
