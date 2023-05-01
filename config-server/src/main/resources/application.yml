@@ -1,0 +1,38 @@
+app:
+  name: Cloud Config Service
+server:
+  port: 8888
+spring:
+  application:
+    name: CONFIGURATION-SERVICE
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/IdahK/cloud-config-repo
+          default-label: master
+# configure eureka client
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 1
+    lease-expiration-duration-in-seconds: 3
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "info", "metrics", "prometheus", "bindings", "beans", "env", "loggers", "streamsbindings", "mappings","flyway","gateway"]
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+
